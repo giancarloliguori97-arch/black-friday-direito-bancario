@@ -1,0 +1,56 @@
+BLACK FRIDAY INFINITA DIREITO BANCÁRIO — pacote para publicar na Vercel
+=======================================================================
+
+Site estático: um index.html + pasta img/ (imagens em WebP). Não tem build,
+não tem dependências e não precisa de Node.
+
+CONTEÚDO DA PASTA
+  index.html               a página (CSS e JS embutidos)
+  img/                     imagens já otimizadas (~2 MB no total)
+  vercel.json              cache das imagens (30 dias) e cabeçalhos de segurança
+  .vercelignore            impede que este LEIA-ME e o .gs sejam publicados
+  apps-script-planilha.gs  script que grava os cadastros na planilha (vai no Google, não na Vercel)
+
+
+1) ANTES DE PUBLICAR — ligar o formulário à planilha
+   Sem isso a página funciona, mas o cadastro NÃO é salvo
+   (o formulário mostra erro e não finge sucesso).
+
+   a. Abra a planilha de cadastros:
+      https://docs.google.com/spreadsheets/d/1-I32EFtG1SCXla9rLvehCd5Eh-IEVgAOtK-lR52gLDU
+   b. Siga o passo a passo no topo do arquivo apps-script-planilha.gs
+      (Extensões > Apps Script > colar > Implantar como "App da Web",
+      acesso "Qualquer pessoa"). Copie a URL que termina em /exec.
+   c. No index.html, procure "var CONFIG" e preencha:
+        endpoint: 'https://script.google.com/macros/s/....../exec',
+        grupoUrl: 'link de convite do grupo',      (opcional)
+        privacidadeUrl / termosUrl                  (opcional; vazio = não aparece)
+
+
+2) PUBLICAR NA VERCEL (escolha uma opção)
+
+   Opção A — pela linha de comando (mais rápida)
+     Na pasta black-friday-infinita, rode:
+       npx vercel          (primeira vez: login e escolha do time/projeto da cliente)
+       npx vercel --prod   (publica em produção)
+
+   Opção B — pelo painel, via GitHub
+     Suba o conteúdo desta pasta para um repositório e, na Vercel:
+     Add New > Project > Import. Configurações:
+       Framework Preset: Other
+       Build Command: (vazio)    Output Directory: (vazio / raiz)
+     Deploy.
+
+   Domínio: Project > Settings > Domains > adicionar o domínio da cliente.
+
+
+3) CONFERIR DEPOIS DE PUBLICAR
+   - Fazer um cadastro de teste e ver a linha chegar na aba "Cadastros".
+   - Abrir no celular e no desktop.
+   - UTMs da URL (utm_source etc.) são gravadas junto com o cadastro.
+
+
+TROCAR IMAGEM NO FUTURO
+   As imagens ficam em cache por 30 dias. Ao trocar uma, salve com NOME NOVO
+   (ex.: hero-desktop-9.webp) e atualize o nome no index.html, senão quem já
+   visitou pode continuar vendo a antiga.
