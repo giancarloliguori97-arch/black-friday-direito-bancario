@@ -36,7 +36,7 @@ VERSOES = {
     ),
     'v5': dict(
         longo=True,
-        h1='Na Black Friday Infinita,|eu vou liberar todas as minhas|formações de Direito Bancário|e todas as que eu ainda vou|lançar, numa única compra|e com acesso pra sempre.',
+        h1='Na Black Friday Infinita,|eu vou liberar todas as minhas|formações de Direito Bancário|e todas as que eu ainda vou|lançar, numa única compra|e com *acesso pra sempre*.',
         h2='A trilha completa pra sair do êxito e construir um escritório bancário com honorário '
            'inicial e previsibilidade.',
     ),
