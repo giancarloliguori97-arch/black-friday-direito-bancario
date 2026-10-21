@@ -1090,6 +1090,8 @@ var CONFIG = {
   webhooksExtras: ['https://hook.us2.make.com/57hv8n4xlpuptevs9dpt6j49c6k8gpv8'],
   // Link de convite do grupo (WhatsApp ou outro)
   grupoUrl: '',
+  // Depois da inscrição, manda o lead para esta página com ?email=... (vazio = mostra a mensagem de sucesso aqui mesmo)
+  redirectUrl: 'https://confirme-inscricao-black-direito-bancario.lovable.app',
   // Links legais — deixe vazio para não exibir
   privacidadeUrl: '',
   termosUrl: ''
@@ -1184,7 +1186,14 @@ var CONFIG = {
     success.hidden = false;
     if (focus) $('success-title').focus();
   }
-  if (registered()) showSuccess(false);
+  if (registered() && !CONFIG.redirectUrl) showSuccess(false);
+  // ao voltar da página de confirmação pelo botão "voltar", o navegador pode restaurar o botão travado
+  window.addEventListener('pageshow', function(ev){
+    if (!ev.persisted) return;
+    var b = form.querySelector('button[type=submit]');
+    b.disabled = false; form.classList.remove('is-loading');
+    b.querySelector('.btn-label').textContent = 'Quero acesso vitalício';
+  });
 
   /* ---------- envio ---------- */
   form.addEventListener('submit', function(e){
@@ -1212,6 +1221,7 @@ var CONFIG = {
     });
 
     var btn = form.querySelector('button[type=submit]'), label = btn.querySelector('.btn-label');
+    var redirecting = false;
     btn.disabled = true; form.classList.add('is-loading'); label.textContent = 'Enviando…';
 
     // webhooks extras (Make etc.): form-urlencoded + no-cors + keepalive = chega mesmo se a página mudar
@@ -1232,15 +1242,26 @@ var CONFIG = {
     }).then(function(t){
       // o Apps Script responde {"ok":false} quando não consegue gravar
       if (/"ok"\s*:\s*false/.test(t || '')) throw new Error(t);
-      store(false, '1');
       if (window.dataLayer) window.dataLayer.push({ event: 'lead_bfi' });
       if (window.fbq) window.fbq('track', 'Lead');
+      if (CONFIG.redirectUrl) {
+        // vai para a página de confirmação levando o e-mail (?email=...) para preencher o próximo formulário
+        var dest = new URL(CONFIG.redirectUrl);
+        dest.searchParams.set('email', data.email);
+        redirecting = true;
+        label.textContent = 'Redirecionando…';
+        // pequena pausa para os pixels (Meta/GTM) dispararem antes de sair da página
+        setTimeout(function(){ location.href = dest.toString(); }, 400);
+        return;
+      }
+      store(false, '1');
       showSuccess(true);
       updateBar();
     }).catch(function(err){
       console.error('[BFI] Falha no envio:', err);
       formError.textContent = 'Não conseguimos registrar seu cadastro. Verifique sua conexão e tente de novo.';
     }).then(function(){
+      if (redirecting) return;
       btn.disabled = false; form.classList.remove('is-loading'); label.textContent = 'Quero acesso vitalício';
     });
   });
