@@ -1085,6 +1085,9 @@ var CONFIG = {
   endpoint: 'https://script.google.com/macros/s/AKfycbzVlw4F4hAjQ2KhWaxSzbso_u9lvDSkFguca7L0i_72ehkScXgy3uK5e3y9c_uqJqur/exec',
   // 'form' (application/x-www-form-urlencoded) é o formato que o Apps Script lê · 'json' para webhooks de CRM
   formato: 'form',
+  // Webhooks extras que também recebem o cadastro (ex.: Make). Envio em paralelo,
+  // sem bloquear: se falharem, o cadastro na planilha segue valendo.
+  webhooksExtras: ['https://hook.us2.make.com/57hv8n4xlpuptevs9dpt6j49c6k8gpv8'],
   // Link de convite do grupo (WhatsApp ou outro)
   grupoUrl: '',
   // Links legais — deixe vazio para não exibir
@@ -1210,6 +1213,14 @@ var CONFIG = {
 
     var btn = form.querySelector('button[type=submit]'), label = btn.querySelector('.btn-label');
     btn.disabled = true; form.classList.add('is-loading'); label.textContent = 'Enviando…';
+
+    // webhooks extras (Make etc.): form-urlencoded + no-cors + keepalive = chega mesmo se a página mudar
+    (CONFIG.webhooksExtras || []).forEach(function(url){
+      try {
+        fetch(url, { method: 'POST', mode: 'no-cors', keepalive: true, body: new URLSearchParams(data) })
+          .catch(function(err){ console.error('[BFI] Webhook extra falhou:', url, err); });
+      } catch(err){ console.error('[BFI] Webhook extra falhou:', url, err); }
+    });
 
     var opts = { method: 'POST' };
     if (CONFIG.formato === 'form') opts.body = new URLSearchParams(data);
