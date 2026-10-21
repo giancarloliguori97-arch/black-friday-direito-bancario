@@ -52,15 +52,23 @@ function doPost(e) {
     while (linha > 1 && valoresData[linha - 1][0] === '') linha--;
     linha++;
 
-    cabecalho.forEach(function (h, i) {
-      var campo = MAPA[h];
-      if (!campo) return;
+    // grava tudo de uma vez (uma chamada só = mais rápido), do 1º ao último campo mapeado;
+    // colunas não mapeadas no meio do caminho mantêm o que já tinham
+    var cols = [];
+    cabecalho.forEach(function (h, i) { if (MAPA[h]) cols.push(i); });
+    var ini = Math.min.apply(null, cols), fim = Math.max.apply(null, cols);
+    var faixa = aba.getRange(linha, ini + 1, 1, fim - ini + 1);
+    var valores = faixa.getValues()[0];
+    for (var i = ini; i <= fim; i++) {
+      var campo = MAPA[cabecalho[i]];
+      if (!campo) continue;
       var valor;
       if (campo === '_agora') valor = new Date();
       else if (campo === 'whatsapp') valor = "'" + String(p.whatsapp); // apóstrofo: não vira número
       else valor = p[campo] || '';
-      aba.getRange(linha, i + 1).setValue(valor);
-    });
+      valores[i - ini] = valor;
+    }
+    faixa.setValues([valores]);
 
     return resposta({ ok: true });
   } catch (err) {

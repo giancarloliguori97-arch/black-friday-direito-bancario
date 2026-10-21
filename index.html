@@ -1108,6 +1108,8 @@ var CONFIG = {
   grupoUrl: '',
   // Depois da inscrição, manda o lead para esta página com ?email=... (vazio = mostra a mensagem de sucesso aqui mesmo)
   redirectUrl: 'https://confirme-inscricao-black-direito-bancario.lovable.app',
+  // Tempo máximo (ms) esperando a planilha confirmar antes de redirecionar mesmo assim
+  esperaMaxMs: 1200,
   // Links legais — deixe vazio para não exibir
   privacidadeUrl: '',
   termosUrl: ''
@@ -1248,16 +1250,13 @@ var CONFIG = {
       } catch(err){ console.error('[BFI] Webhook extra falhou:', url, err); }
     });
 
-    var opts = { method: 'POST' };
+    var opts = { method: 'POST', keepalive: true }; // keepalive: o envio termina mesmo depois do redirect
     if (CONFIG.formato === 'form') opts.body = new URLSearchParams(data);
     else { opts.headers = { 'Content-Type': 'application/json' }; opts.body = JSON.stringify(data); }
 
-    fetch(CONFIG.endpoint, opts).then(function(r){
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      return r.text();
-    }).then(function(t){
-      // o Apps Script responde {"ok":false} quando não consegue gravar
-      if (/"ok"\s*:\s*false/.test(t || '')) throw new Error(t);
+    var finished = false;
+    function concluir(){
+      if (finished) return; finished = true;
       if (window.dataLayer) window.dataLayer.push({ event: 'lead_bfi' });
       if (window.fbq) window.fbq('track', 'Lead');
       if (CONFIG.redirectUrl) {
@@ -1266,19 +1265,42 @@ var CONFIG = {
         dest.searchParams.set('email', data.email);
         redirecting = true;
         label.textContent = 'Redirecionando…';
-        // pequena pausa para os pixels (Meta/GTM) dispararem antes de sair da página
-        setTimeout(function(){ location.href = dest.toString(); }, 400);
+        // pausa curta para o pixel (Meta/GTM) sair antes de trocar de página
+        setTimeout(function(){ location.href = dest.toString(); }, 250);
         return;
       }
       store(false, '1');
       showSuccess(true);
       updateBar();
-    }).catch(function(err){
+      liberar();
+    }
+    function falhar(err){
+      if (finished) return; finished = true;
       console.error('[BFI] Falha no envio:', err);
       formError.textContent = 'Não conseguimos registrar seu cadastro. Verifique sua conexão e tente de novo.';
-    }).then(function(){
+      liberar();
+    }
+    function liberar(){
       if (redirecting) return;
       btn.disabled = false; form.classList.remove('is-loading'); label.textContent = 'Quero acesso vitalício';
+    }
+
+    // O Apps Script às vezes leva 2–4 s para responder. Se não responder em CONFIG.esperaMaxMs,
+    // seguimos em frente: o envio continua em segundo plano (keepalive) e o Make já recebeu em paralelo.
+    // Se ele responder ANTES com erro, mostramos o erro normalmente.
+    var timer = CONFIG.redirectUrl && CONFIG.esperaMaxMs ? setTimeout(concluir, CONFIG.esperaMaxMs) : null;
+
+    fetch(CONFIG.endpoint, opts).then(function(r){
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.text();
+    }).then(function(t){
+      // o Apps Script responde {"ok":false} quando não consegue gravar
+      if (/"ok"\s*:\s*false/.test(t || '')) throw new Error(t);
+      clearTimeout(timer);
+      concluir();
+    }).catch(function(err){
+      clearTimeout(timer);
+      falhar(err);
     });
   });
 
