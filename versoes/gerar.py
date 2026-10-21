@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Gera as versões de teste de H1 (v2.html, v3.html…) a partir do index.html (= V1).
+Gera as versões de teste de H1 (v1.html = cópia do index.html, v2.html, v3.html…) a partir do index.html.
 Tudo é igual ao index.html, só muda o H1, o subtítulo (H2) e, se houver, a linha "inclui" (H3).
 
 Uso (na raiz do repositório):  python3 versoes/gerar.py
@@ -55,6 +55,9 @@ def fmt(txt, em_cls=''):
 
 def main():
     base = (RAIZ / 'index.html').read_text(encoding='utf-8')
+    # V1 = cópia idêntica do index.html, para ter o endereço /v1 igual às outras
+    (RAIZ / 'v1.html').write_text(base, encoding='utf-8')
+    print('gerado v1.html')
     for nome, v in VERSOES.items():
         h = base
         cls = 'hero-in h1-long' if v.get('longo') else 'hero-in'
