@@ -1,6 +1,11 @@
 /**
  * Recebe os cadastros da LP "Black Friday Infinita Direito Bancário"
- * e grava na planilha do Google.
+ * e grava na aba "LEADS PÁGINA" da planilha
+ * "INSCRITOS E LEAD SCORE | BLACK FRIDAY 2026 | ANDRESSA BACELLAR".
+ *
+ * Preenche só: Data, Nome, Email, WhatsApp, Source, Medium, Campaign, Content, Term.
+ * "Classificação" e "Comprou?" ficam intocadas (pode ter fórmula nelas).
+ * As colunas são achadas pelo NOME no cabeçalho (linha 1), então a ordem pode mudar.
  *
  * Como publicar (uma vez só):
  * 1. Abra a planilha > Extensões > Apps Script.
@@ -8,11 +13,22 @@
  * 3. Implantar > Nova implantação > tipo "App da Web".
  *    Executar como: Eu  ·  Quem pode acessar: Qualquer pessoa.
  * 4. Autorize o acesso e copie a "URL do app da Web" (termina em /exec).
- * 5. Cole essa URL em CONFIG.endpoint no index.html.
  */
 var PLANILHA_ID = '1-I32EFtG1SCXla9rLvehCd5Eh-IEVgAOtK-lR52gLDU';
-var ABA = 'Cadastros';
-var COLUNAS = ['recebido_em', 'nome', 'email', 'whatsapp', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'pagina', 'campanha', 'enviado_em'];
+var ABA = 'LEADS PÁGINA';
+
+// cabeçalho da planilha  ->  campo enviado pela página
+var MAPA = {
+  'Data': '_agora',
+  'Nome': 'nome',
+  'Email': 'email',
+  'WhatsApp': 'whatsapp',
+  'Source': 'utm_source',
+  'Medium': 'utm_medium',
+  'Campaign': 'utm_campaign',
+  'Content': 'utm_content',
+  'Term': 'utm_term'
+};
 
 function doPost(e) {
   var lock = LockService.getScriptLock();
@@ -21,26 +37,42 @@ function doPost(e) {
     var p = (e && e.parameter) || {};
     if (!p.nome || !p.email || !p.whatsapp) return resposta({ ok: false, erro: 'campos obrigatórios' });
 
-    var ss = SpreadsheetApp.openById(PLANILHA_ID);
-    var aba = ss.getSheetByName(ABA) || ss.insertSheet(ABA);
-    if (aba.getLastRow() === 0) {
-      aba.appendRow(COLUNAS);
-      aba.setFrozenRows(1);
-      aba.getRange(1, 1, 1, COLUNAS.length).setFontWeight('bold');
-    }
-    var linha = COLUNAS.map(function (c) {
-      if (c === 'recebido_em') return new Date();
-      // apóstrofo evita que o Sheets converta o WhatsApp em número
-      if (c === 'whatsapp') return "'" + String(p.whatsapp);
-      return p[c] || '';
+    var aba = SpreadsheetApp.openById(PLANILHA_ID).getSheetByName(ABA);
+    if (!aba) return resposta({ ok: false, erro: 'aba "' + ABA + '" não encontrada' });
+
+    var ultimaCol = aba.getLastColumn();
+    var cabecalho = aba.getRange(1, 1, 1, ultimaCol).getValues()[0]
+      .map(function (h) { return String(h).trim(); });
+
+    // próxima linha = depois do último preenchido na coluna "Data"
+    // (assim fórmulas arrastadas em Classificação/Comprou? não empurram o cadastro pra baixo)
+    var colData = cabecalho.indexOf('Data') + 1 || 1;
+    var valoresData = aba.getRange(1, colData, Math.max(aba.getLastRow(), 1), 1).getValues();
+    var linha = valoresData.length;
+    while (linha > 1 && valoresData[linha - 1][0] === '') linha--;
+    linha++;
+
+    cabecalho.forEach(function (h, i) {
+      var campo = MAPA[h];
+      if (!campo) return;
+      var valor;
+      if (campo === '_agora') valor = new Date();
+      else if (campo === 'whatsapp') valor = "'" + String(p.whatsapp); // apóstrofo: não vira número
+      else valor = p[campo] || '';
+      aba.getRange(linha, i + 1).setValue(valor);
     });
-    aba.appendRow(linha);
+
     return resposta({ ok: true });
   } catch (err) {
     return resposta({ ok: false, erro: String(err) });
   } finally {
     lock.releaseLock();
   }
+}
+
+// Abre no navegador a URL /exec para checar se está publicado
+function doGet() {
+  return resposta({ ok: true, status: 'online' });
 }
 
 function resposta(obj) {
