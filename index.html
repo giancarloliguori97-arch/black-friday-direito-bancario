@@ -1095,21 +1095,17 @@ src="https://www.facebook.com/tr?id=960132592978971&ev=PageView&noscript=1"/></n
    CONFIGURAÇÃO — preencha antes de publicar
    ========================================================= */
 var CONFIG = {
-  // URL do App da Web do Google Apps Script (termina em /exec) que grava na planilha:
-  // (planilha de cadastros: link no LEIA-ME do pacote de entrega)
-  // O código e o passo a passo estão em apps-script-planilha.gs
-  endpoint: 'https://script.google.com/macros/s/AKfycbzVlw4F4hAjQ2KhWaxSzbso_u9lvDSkFguca7L0i_72ehkScXgy3uK5e3y9c_uqJqur/exec',
-  // 'form' (application/x-www-form-urlencoded) é o formato que o Apps Script lê · 'json' para webhooks de CRM
-  formato: 'form',
-  // Webhooks extras que também recebem o cadastro (ex.: Make). Envio em paralelo,
-  // sem bloquear: se falharem, o cadastro na planilha segue valendo.
+  // Webhook principal (Make): grava na planilha. A página espera ele confirmar o recebimento antes de redirecionar.
+  endpoint: 'https://hook.us2.make.com/9gb1dixose20xc5qgirk72vawwo2kbf1',
+  // Webhooks extras que também recebem o cadastro, em paralelo e sem bloquear o redirecionamento.
   webhooksExtras: ['https://hook.us2.make.com/57hv8n4xlpuptevs9dpt6j49c6k8gpv8'],
   // Link de convite do grupo (WhatsApp ou outro)
   grupoUrl: '',
   // Depois da inscrição, manda o lead para esta página com ?email=... (vazio = mostra a mensagem de sucesso aqui mesmo)
   redirectUrl: 'https://confirme-inscricao-black-direito-bancario.lovable.app',
-  // Tempo máximo (ms) esperando a planilha confirmar antes de redirecionar mesmo assim
-  esperaMaxMs: 1200,
+  // Segurança: se o webhook principal não responder neste tempo (ms), redireciona mesmo assim
+  // (o envio continua em segundo plano). O Make costuma responder em menos de 0,5 s.
+  esperaMaxMs: 6000,
   // Links legais — deixe vazio para não exibir
   privacidadeUrl: '',
   termosUrl: ''
@@ -1242,7 +1238,7 @@ var CONFIG = {
     var redirecting = false;
     btn.disabled = true; form.classList.add('is-loading'); label.textContent = 'Enviando…';
 
-    // webhooks extras (Make etc.): form-urlencoded + no-cors + keepalive = chega mesmo se a página mudar
+    // webhooks extras: form-urlencoded + no-cors + keepalive = chega mesmo se a página mudar
     (CONFIG.webhooksExtras || []).forEach(function(url){
       try {
         fetch(url, { method: 'POST', mode: 'no-cors', keepalive: true, body: new URLSearchParams(data) })
@@ -1250,9 +1246,9 @@ var CONFIG = {
       } catch(err){ console.error('[BFI] Webhook extra falhou:', url, err); }
     });
 
-    var opts = { method: 'POST', keepalive: true }; // keepalive: o envio termina mesmo depois do redirect
-    if (CONFIG.formato === 'form') opts.body = new URLSearchParams(data);
-    else { opts.headers = { 'Content-Type': 'application/json' }; opts.body = JSON.stringify(data); }
+    // form-urlencoded + no-cors: o Make aceita sem precisar de CORS. A promessa só resolve quando o
+    // pedido chegou ao servidor e rejeita se a rede falhar. keepalive: termina mesmo depois do redirect.
+    var opts = { method: 'POST', mode: 'no-cors', keepalive: true, body: new URLSearchParams(data) };
 
     var finished = false;
     function concluir(){
@@ -1285,22 +1281,11 @@ var CONFIG = {
       btn.disabled = false; form.classList.remove('is-loading'); label.textContent = 'Quero acesso vitalício';
     }
 
-    // O Apps Script às vezes leva 2–4 s para responder. Se não responder em CONFIG.esperaMaxMs,
-    // seguimos em frente: o envio continua em segundo plano (keepalive) e o Make já recebeu em paralelo.
-    // Se ele responder ANTES com erro, mostramos o erro normalmente.
-    var timer = CONFIG.redirectUrl && CONFIG.esperaMaxMs ? setTimeout(concluir, CONFIG.esperaMaxMs) : null;
-
-    fetch(CONFIG.endpoint, opts).then(function(r){
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      return r.text();
-    }).then(function(t){
-      // o Apps Script responde {"ok":false} quando não consegue gravar
-      if (/"ok"\s*:\s*false/.test(t || '')) throw new Error(t);
-      clearTimeout(timer);
-      concluir();
+    var timer = CONFIG.esperaMaxMs ? setTimeout(concluir, CONFIG.esperaMaxMs) : null;
+    fetch(CONFIG.endpoint, opts).then(function(){
+      clearTimeout(timer); concluir();
     }).catch(function(err){
-      clearTimeout(timer);
-      falhar(err);
+      clearTimeout(timer); falhar(err);
     });
   });
 
