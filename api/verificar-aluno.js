@@ -15,6 +15,7 @@
  *   { "aluno": true }   { "aluno": false }
  *   true / false / "sim" / "nao"
  *   { "status": "aluno" } / { "status": "nao_aluno" }
+ *   ou um redirecionamento 302 com Location = link do checkout (o link de aluno conta como aluno)
  *
  * Passar pela função (em vez de chamar o webhook direto do navegador) evita problema de CORS
  * e não expõe a URL do webhook no código da página.
@@ -22,6 +23,9 @@
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const TIMEOUT_MS = 10000;
+// Se o Make responder com redirecionamento (302 + Location), a oferta do link decide:
+// link com o código da oferta de aluno = aluno; qualquer outro link = não aluno.
+const OFERTA_ALUNO = process.env.OFERTA_ALUNO || 'mk2ryhft';
 const KEYS = ['aluno', 'is_aluno', 'isAluno', 'eh_aluno', 'student', 'is_student', 'isStudent',
   'encontrado', 'found', 'valido', 'valid', 'resultado', 'result', 'status'];
 const YES = ['true', 'sim', 'yes', 's', 'y', '1', 'aluno', 'valido', 'válido', 'encontrado', 'found', 'ativo', 'active'];
@@ -85,9 +89,17 @@ module.exports = async function handler(req, res) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json, text/plain, */*' },
       body: JSON.stringify(dados),
-      signal: ctrl.signal
+      signal: ctrl.signal,
+      redirect: 'manual'
     });
+    const location = r.headers.get('location');
+    if (r.status >= 300 && r.status < 400) {
+      const aluno = !!location && location.includes(OFERTA_ALUNO);
+      console.log('[verificar-aluno] Webhook redirecionou', r.status, '->', location, '=> aluno:', aluno);
+      return res.status(200).json({ aluno });
+    }
     const text = await r.text();
+    console.log('[verificar-aluno] Webhook respondeu', r.status, JSON.stringify(text.slice(0, 200)));
     if (!r.ok) {
       console.error('[verificar-aluno] Webhook respondeu', r.status, text.slice(0, 200));
       return res.status(502).json({ erro: 'verificacao_falhou' });
