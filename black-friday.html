@@ -1657,7 +1657,7 @@ var CONFIG = {
   checkoutNaoAluno: 'https://pay.hotmart.com/C108463383T?off=we6vmqkl',
   // Webhooks que recebem o pré-checkout (nome, e-mail, WhatsApp). Vazio = não envia, mas a compra segue normalmente.
   webhookAluno: '',      // aluno com e-mail confirmado
-  webhookNaoAluno: '',   // não aluno (inclui quem clicou em "Já sou aluno" e não foi encontrado)
+  webhookNaoAluno: 'https://hook.us2.make.com/pq826u4nw0c3wjd2az2aavmmav61wrnr',   // não aluno (inclui quem clicou em "Já sou aluno" e não foi encontrado)
   // Tempo máximo (ms) esperando o webhook antes de ir para o checkout (o envio continua em segundo plano)
   esperaWebhookMs: 1500,
   // Verificação do e-mail de aluno (função em /api/verificar-aluno.js, que consulta o webhook configurado na Vercel)
