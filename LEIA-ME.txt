@@ -62,8 +62,8 @@ PÁGINA DE VENDAS (/black-friday)
   api/verificar-aluno.js     função que confere o e-mail de aluno do pop-up "Já sou aluno"
 
   Checkouts (no black-friday.html, procure "var CONFIG"):
-    aluno      https://pay.hotmart.com/C108463383T?off=mk2ryhft
-    não aluno  https://pay.hotmart.com/C108463383T?off=we6vmqkl
+    aluno      https://pay.hotmart.com/C108463383T?off=mk2ryhft&checkoutMode=10
+    não aluno  https://pay.hotmart.com/C108463383T?off=we6vmqkl&checkoutMode=10
   A página repassa para o checkout as UTMs, src e sck da URL, e o e-mail digitado.
 
   Verificação do e-mail de aluno

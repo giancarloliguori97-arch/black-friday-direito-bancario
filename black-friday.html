@@ -1343,7 +1343,7 @@ src="https://www.facebook.com/tr?id=960132592978971&ev=PageView&noscript=1"/></n
         <p class="pb-x">12x de</p>
         <p class="pb-v gold-text">R$ 498,72</p>
         <p class="pb-cash">ou <b>R$ 4.997,00</b> à vista</p>
-        <a class="btn btn-shine" href="https://pay.hotmart.com/C108463383T?off=we6vmqkl" data-checkout="nao-aluno">
+        <a class="btn btn-shine" href="https://pay.hotmart.com/C108463383T?off=we6vmqkl&checkoutMode=10" data-checkout="nao-aluno">
           <span class="btn-label">Quero acesso vitalício</span>
           <svg aria-hidden="true"><use href="#ic-arrow"/></svg>
         </a>
@@ -1642,7 +1642,7 @@ src="https://www.facebook.com/tr?id=960132592978971&ev=PageView&noscript=1"/></n
       <h2 tabindex="-1">Não encontramos esse e-mail entre os alunos.</h2>
       <p>Não achamos <strong id="cm-no-email"></strong> na base de alunos. Você segue com a oferta para não alunos: 12x de R$&nbsp;498,72 ou R$&nbsp;4.997 à vista.</p>
       <div class="m-actions">
-        <a class="btn" id="cm-no-go" href="https://pay.hotmart.com/C108463383T?off=we6vmqkl">Seguir para o pagamento<svg aria-hidden="true"><use href="#ic-arrow"/></svg></a>
+        <a class="btn" id="cm-no-go" href="https://pay.hotmart.com/C108463383T?off=we6vmqkl&checkoutMode=10">Seguir para o pagamento<svg aria-hidden="true"><use href="#ic-arrow"/></svg></a>
         <button class="btn btn-ghost" type="button" id="cm-retry">Tentar outro e-mail</button>
       </div>
       <p class="m-count" id="cm-count" aria-live="polite"></p>
@@ -1656,8 +1656,8 @@ src="https://www.facebook.com/tr?id=960132592978971&ev=PageView&noscript=1"/></n
    ========================================================= */
 var CONFIG = {
   // Checkouts da Hotmart
-  checkoutAluno: 'https://pay.hotmart.com/C108463383T?off=mk2ryhft',
-  checkoutNaoAluno: 'https://pay.hotmart.com/C108463383T?off=we6vmqkl',
+  checkoutAluno: 'https://pay.hotmart.com/C108463383T?off=mk2ryhft&checkoutMode=10',
+  checkoutNaoAluno: 'https://pay.hotmart.com/C108463383T?off=we6vmqkl&checkoutMode=10',
   // Webhooks que recebem o pré-checkout (nome, e-mail, WhatsApp). Vazio = não envia, mas a compra segue normalmente.
   webhookAluno: '',      // opcional: aviso extra quando o aluno é confirmado. Os dados de quem clica em "Já sou aluno"
                          // já vão completos para o webhook de verificação (VERIFICACAO_ALUNO_URL na Vercel)
