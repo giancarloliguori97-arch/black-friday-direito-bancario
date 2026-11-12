@@ -939,6 +939,24 @@ body::after{content:"";position:fixed;inset:-50%;z-index:100;pointer-events:none
 .m-check.no{background:rgba(255,255,255,.03);border-color:var(--line-2);color:var(--text-2)}
 .m-count{margin-top:14px;font-size:13px;color:var(--text-3);text-align:center}
 .m-step[hidden]{display:none}
+/* pré-checkout: campos e telefone */
+.modal .fields{margin-top:20px}
+.modal .field{margin-top:0}
+.cm-price{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;margin-top:16px!important;padding:14px 16px;border:1px solid var(--line);border-radius:var(--r);background:rgba(8,8,8,.35)}
+.cm-price .x{font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--text)}
+.cm-price b{font-size:28px;line-height:1;font-weight:800;letter-spacing:-.03em}
+.cm-price small{font-size:13.5px;color:var(--text-2)}
+.tel{position:relative;display:flex;align-items:stretch;height:54px;background:#0C0C0B;border:1px solid var(--line-2);border-radius:8px;transition:border-color .2s,box-shadow .2s}
+.tel:hover{border-color:rgba(246,243,236,.28)}
+.tel:focus-within{border-color:var(--gold);box-shadow:0 0 0 3px rgba(210,174,99,.2)}
+.tel:has(input[aria-invalid="true"]){border-color:var(--error)}
+.tel-pre{display:flex;align-items:center;gap:8px;padding:0 12px 0 14px;border-right:1px solid var(--line-2);font:700 15px Manrope,system-ui,sans-serif;color:var(--text);white-space:nowrap;user-select:none}
+.tel-pre .flag{width:22px;height:16px;border-radius:2px;flex:none}
+.field .tel input{flex:1;min-width:0;height:100%;border:0;border-radius:0 8px 8px 0;background:transparent;letter-spacing:.02em}
+.field .tel input:focus{box-shadow:none}
+.modal .micro{justify-content:center;text-align:left}
+@media (max-width:599.98px){.modal .fields{gap:12px}.tel{height:50px}.modal .field input{height:50px}.field .tel input{height:100%}}
+
 @media (max-width:959.98px){.forever-sec{padding-top:clamp(28px,5vw,56px)}}
 .wrap > .sec-body{margin-top:clamp(40px,4.5vw,64px)}
 @media (max-width:599.98px){.mkt{padding:24px 20px}.mkt .case{padding:16px 14px 18px}.mkt .case-flow small{font-size:12px}}
@@ -1317,7 +1335,7 @@ src="https://www.facebook.com/tr?id=960132592978971&ev=PageView&noscript=1"/></n
       <article class="price-box rv" aria-labelledby="pb-nao-title">
         <span class="pb-tag">Oferta para não alunos</span>
         <h3 class="pb-title" id="pb-nao-title">Ainda não sou aluno</h3>
-        <p class="pb-desc">Entre direto pelo pagamento.</p>
+        <p class="pb-desc">Preencha seus dados e siga para o pagamento.</p>
         <span class="pb-div" aria-hidden="true"></span>
         <p class="pb-x">12x de</p>
         <p class="pb-v gold-text">R$ 498,72</p>
@@ -1564,46 +1582,67 @@ src="https://www.facebook.com/tr?id=960132592978971&ev=PageView&noscript=1"/></n
   <a class="btn" href="#precos" tabindex="-1"><span class="btn-label">Quero acesso vitalício</span></a>
 </div>
 
-<!-- Pop-up: verificação do e-mail de aluno -->
-<dialog class="modal" id="aluno-modal" aria-labelledby="am-title">
+<!-- Pop-up de pré-checkout (aluno e não aluno) -->
+<dialog class="modal" id="checkout-modal" aria-labelledby="cm-title">
   <div class="modal-in">
     <button class="modal-x" type="button" data-close aria-label="Fechar"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button>
 
-    <div class="m-step" id="am-step-form">
-      <span class="eyebrow"><svg viewBox="0 0 200 100" aria-hidden="true"><use href="#inf" class="inf-line"/></svg>Oferta para alunos</span>
-      <h2 id="am-title" tabindex="-1">Qual é o seu e&#8209;mail de aluno?</h2>
-      <p>Use o mesmo e-mail com que você comprou o curso. A gente confere e já leva você para o pagamento com a condição de aluno.</p>
-      <form id="am-form" novalidate>
-        <div class="field">
-          <label for="am-email">E-mail de aluno</label>
-          <input id="am-email" name="email" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" enterkeyhint="go" placeholder="voce@email.com" required aria-describedby="am-err">
-          <p class="field-error" id="am-err" aria-live="polite"></p>
+    <div class="m-step" id="cm-step-form">
+      <span class="eyebrow"><svg viewBox="0 0 200 100" aria-hidden="true"><use href="#inf" class="inf-line"/></svg><span id="cm-kicker">Oferta para não alunos</span></span>
+      <h2 id="cm-title" tabindex="-1">Falta pouco para garantir seu acesso</h2>
+      <p id="cm-desc">Preencha seus dados para seguir para o pagamento.</p>
+      <p class="cm-price"><span class="x">12x de</span><b class="gold-text" id="cm-price">R$&nbsp;498,72</b><small id="cm-cash">ou R$&nbsp;4.997 à vista</small></p>
+
+      <form id="cm-form" novalidate>
+        <div class="fields">
+          <div class="field">
+            <label for="cm-nome">Nome completo</label>
+            <input id="cm-nome" name="nome" type="text" autocomplete="name" autocapitalize="words" enterkeyhint="next" placeholder="Seu nome" required aria-describedby="cm-e-nome">
+            <p class="field-error" id="cm-e-nome" aria-live="polite"></p>
+          </div>
+          <div class="field">
+            <label for="cm-email" id="cm-email-label">E-mail</label>
+            <input id="cm-email" name="email" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" enterkeyhint="next" placeholder="voce@email.com" required aria-describedby="cm-e-email">
+            <p class="field-error" id="cm-e-email" aria-live="polite"></p>
+          </div>
+          <div class="field">
+            <label for="cm-tel">WhatsApp com DDD</label>
+            <div class="tel">
+              <span class="tel-pre" aria-hidden="true">
+                <svg class="flag" viewBox="0 0 28 20"><rect width="28" height="20" rx="3" fill="#229E45"/><path d="M14 3.2 24.6 10 14 16.8 3.4 10Z" fill="#F8E509"/><circle cx="14" cy="10" r="4.1" fill="#2B49A3"/><path d="M10.1 9.1c2.7-.5 5.6.1 7.8 1.6" stroke="#fff" stroke-width=".8" fill="none"/></svg>
+                +55
+              </span>
+              <input id="cm-tel" name="telefone" type="tel" inputmode="tel" autocomplete="tel-national" enterkeyhint="go" placeholder="(11) 91234-5678" maxlength="16" required aria-describedby="cm-e-tel">
+            </div>
+            <p class="field-error" id="cm-e-tel" aria-live="polite"></p>
+          </div>
         </div>
-        <button class="btn" type="submit">
+        <button class="btn btn-shine" type="submit">
           <span class="spinner" aria-hidden="true"></span>
-          <span class="btn-label">Verificar e continuar</span>
+          <span class="btn-label" id="cm-btn-label">Ir para o pagamento</span>
           <svg class="ic-enter" aria-hidden="true"><use href="#ic-arrow"/></svg>
         </button>
-        <p class="form-error" id="am-ferr" role="alert"></p>
+        <p class="form-error" id="cm-ferr" role="alert"></p>
+        <p class="micro"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-lock"/></svg><span>Pagamento seguro pela Hotmart.</span></p>
       </form>
     </div>
 
-    <div class="m-step" id="am-step-ok" hidden>
+    <div class="m-step" id="cm-step-ok" hidden>
       <span class="m-check" aria-hidden="true"><svg><use href="#ic-check"/></svg></span>
-      <h2 tabindex="-1">E-mail confirmado.</h2>
+      <h2 tabindex="-1">E-mail de aluno confirmado.</h2>
       <p>Levando você para o pagamento com a condição de aluno: 12x de R$&nbsp;448,82 ou R$&nbsp;4.497 à vista.</p>
-      <div class="m-actions"><a class="btn" id="am-ok-go" href="#">Ir para o pagamento<svg aria-hidden="true"><use href="#ic-arrow"/></svg></a></div>
+      <div class="m-actions"><a class="btn" id="cm-ok-go" href="#">Ir para o pagamento<svg aria-hidden="true"><use href="#ic-arrow"/></svg></a></div>
     </div>
 
-    <div class="m-step" id="am-step-no" hidden>
+    <div class="m-step" id="cm-step-no" hidden>
       <span class="m-check no" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 4.5v4.5M8 11.5v.01"/></svg></span>
       <h2 tabindex="-1">Não encontramos esse e-mail entre os alunos.</h2>
-      <p>Não achamos <strong id="am-no-email"></strong> na base de alunos. Você segue com a oferta para não alunos: 12x de R$&nbsp;498,72 ou R$&nbsp;4.997 à vista.</p>
+      <p>Não achamos <strong id="cm-no-email"></strong> na base de alunos. Você segue com a oferta para não alunos: 12x de R$&nbsp;498,72 ou R$&nbsp;4.997 à vista.</p>
       <div class="m-actions">
-        <a class="btn" id="am-no-go" href="https://pay.hotmart.com/C108463383T?off=we6vmqkl">Seguir para o pagamento<svg aria-hidden="true"><use href="#ic-arrow"/></svg></a>
-        <button class="btn btn-ghost" type="button" id="am-retry">Tentar outro e-mail</button>
+        <a class="btn" id="cm-no-go" href="https://pay.hotmart.com/C108463383T?off=we6vmqkl">Seguir para o pagamento<svg aria-hidden="true"><use href="#ic-arrow"/></svg></a>
+        <button class="btn btn-ghost" type="button" id="cm-retry">Tentar outro e-mail</button>
       </div>
-      <p class="m-count" id="am-count" aria-live="polite"></p>
+      <p class="m-count" id="cm-count" aria-live="polite"></p>
     </div>
   </div>
 </dialog>
@@ -1616,10 +1655,15 @@ var CONFIG = {
   // Checkouts da Hotmart
   checkoutAluno: 'https://pay.hotmart.com/C108463383T?off=mk2ryhft',
   checkoutNaoAluno: 'https://pay.hotmart.com/C108463383T?off=we6vmqkl',
+  // Webhooks que recebem o pré-checkout (nome, e-mail, WhatsApp). Vazio = não envia, mas a compra segue normalmente.
+  webhookAluno: '',      // aluno com e-mail confirmado
+  webhookNaoAluno: '',   // não aluno (inclui quem clicou em "Já sou aluno" e não foi encontrado)
+  // Tempo máximo (ms) esperando o webhook antes de ir para o checkout (o envio continua em segundo plano)
+  esperaWebhookMs: 1500,
   // Verificação do e-mail de aluno (função em /api/verificar-aluno.js, que consulta o webhook configurado na Vercel)
   verificacaoUrl: '/api/verificar-aluno',
   verificacaoTimeoutMs: 12000,
-  // Quem não é aluno vê a mensagem e segue sozinho para o checkout de não aluno depois de X segundos
+  // Quem clicou em aluno e não foi encontrado segue sozinho para o checkout de não aluno depois de X segundos
   segundosAteRedirecionar: 6,
   // Links legais — deixe vazio para não exibir
   privacidadeUrl: '',
@@ -1640,12 +1684,18 @@ var CONFIG = {
     $('legal').appendChild(a);
   });
 
-  /* ---------- checkout: leva UTMs/src/sck da página e o e-mail para a Hotmart ---------- */
+  /* ---------- checkout: leva UTMs/src/sck da página e os dados do pré-checkout para a Hotmart ---------- */
   var PASS = ['utm_source','utm_medium','utm_campaign','utm_content','utm_term','src','sck','xcod'];
-  function checkout(base, email){
+  function digits(v){ return String(v || '').replace(/\D/g, ''); }
+  function checkout(base, lead){
     var u = new URL(base);
     PASS.forEach(function(k){ if (params.get(k)) u.searchParams.set(k, params.get(k)); });
-    if (email) u.searchParams.set('email', email);
+    if (lead) {
+      if (lead.nome) u.searchParams.set('name', lead.nome);
+      if (lead.email) u.searchParams.set('email', lead.email);
+      var d = digits(lead.telefone);
+      if (d.length >= 10) { u.searchParams.set('phoneac', d.slice(0, 2)); u.searchParams.set('phonenumber', d.slice(2)); }
+    }
     return u.toString();
   }
   function track(tipo){
@@ -1654,16 +1704,55 @@ var CONFIG = {
       if (window.dataLayer) window.dataLayer.push({ event: 'checkout_bfi', oferta: tipo });
     } catch(e){}
   }
-  document.querySelectorAll('[data-checkout="nao-aluno"]').forEach(function(a){
-    a.href = checkout(CONFIG.checkoutNaoAluno);
-    a.addEventListener('click', function(){ track('nao-aluno'); });
-  });
 
-  /* ---------- pop-up do aluno ---------- */
-  var dlg = $('aluno-modal'), amForm = $('am-form'), amEmail = $('am-email'), amErr = $('am-err'), amFerr = $('am-ferr');
-  var amBtn = amForm.querySelector('button[type=submit]'), amLabel = amBtn.querySelector('.btn-label');
-  var stepEls = { form: $('am-step-form'), ok: $('am-step-ok'), no: $('am-step-no') };
-  var opener = null, countT = 0, goT = 0, busy = false;
+  /* envia o cadastro ao webhook (form-urlencoded + no-cors + keepalive: chega mesmo depois do redirecionamento).
+     Nunca trava a compra: resolve quando o webhook recebe ou depois de CONFIG.esperaWebhookMs. */
+  function enviar(url, data){
+    if (!url) { console.warn('[BFI] Webhook não configurado para', data.tipo, '— cadastro não enviado.'); return Promise.resolve(); }
+    return new Promise(function(resolve){
+      var t = setTimeout(resolve, CONFIG.esperaWebhookMs);
+      try {
+        fetch(url, { method: 'POST', mode: 'no-cors', keepalive: true, body: new URLSearchParams(data) })
+          .then(function(){ clearTimeout(t); resolve(); }, function(err){ console.error('[BFI] Webhook falhou:', err); clearTimeout(t); resolve(); });
+      } catch(err){ console.error('[BFI] Webhook falhou:', err); clearTimeout(t); resolve(); }
+    });
+  }
+  function payload(lead, tipo, extra){
+    var d = {
+      nome: lead.nome,
+      email: lead.email,
+      whatsapp: '55' + digits(lead.telefone),
+      telefone: lead.telefone,
+      tipo: tipo,                         // 'aluno' ou 'nao-aluno' (checkout para onde a pessoa vai)
+      clicou_em: lead.clicouEm,           // botão que a pessoa clicou: 'aluno' ou 'nao-aluno'
+      campanha: 'black-friday-infinita-direito-bancario',
+      pagina: location.href.split('#')[0],
+      enviado_em: new Date().toISOString()
+    };
+    PASS.forEach(function(k){ if (params.get(k)) d[k] = params.get(k); });
+    for (var k in (extra || {})) d[k] = extra[k];
+    return d;
+  }
+
+  /* ---------- pop-up de pré-checkout ---------- */
+  var dlg = $('checkout-modal'), cmForm = $('cm-form');
+  var fNome = $('cm-nome'), fEmail = $('cm-email'), fTel = $('cm-tel'), cmFerr = $('cm-ferr');
+  var cmBtn = cmForm.querySelector('button[type=submit]'), cmLabel = $('cm-btn-label');
+  var stepEls = { form: $('cm-step-form'), ok: $('cm-step-ok'), no: $('cm-step-no') };
+  var MODES = {
+    'nao-aluno': {
+      kicker: 'Oferta para não alunos', title: 'Falta pouco para garantir seu acesso',
+      desc: 'Preencha seus dados para seguir para o pagamento.',
+      price: 'R$ 498,72', cash: 'ou R$ 4.997 à vista', email: 'E-mail', btn: 'Ir para o pagamento'
+    },
+    'aluno': {
+      kicker: 'Oferta para alunos', title: 'Confirme seus dados de aluno',
+      desc: 'Use o mesmo e-mail com que você comprou o curso. A gente confere e leva você para o pagamento com a condição de aluno.',
+      price: 'R$ 448,82', cash: 'ou R$ 4.497 à vista', email: 'E-mail de aluno', btn: 'Verificar e continuar'
+    }
+  };
+  var mode = 'nao-aluno', opener = null, countT = 0, goT = 0, busy = false, lead = null;
+  var SAVE = 'bfi-precheckout';
 
   function step(name){
     Object.keys(stepEls).forEach(function(k){ stepEls[k].hidden = k !== name; });
@@ -1671,34 +1760,92 @@ var CONFIG = {
     if (name !== 'form' && h) h.focus({ preventScroll: true });
   }
   function stopTimers(){ clearInterval(countT); clearTimeout(goT); }
-  function resetForm(){
-    busy = false; amBtn.disabled = false; amForm.classList.remove('is-loading');
-    amLabel.textContent = 'Verificar e continuar';
+  function resetBtn(){
+    busy = false; cmBtn.disabled = false; cmForm.classList.remove('is-loading');
+    cmLabel.textContent = MODES[mode].btn;
   }
-  function openAluno(btn){
-    opener = btn; stopTimers(); resetForm(); amFerr.textContent = ''; setErr('');
-    step('form');
+  function loadSaved(){
+    try { var s = JSON.parse(sessionStorage.getItem(SAVE) || 'null'); if (!s) return;
+      if (!fNome.value) fNome.value = s.nome || '';
+      if (!fEmail.value) fEmail.value = s.email || '';
+      if (!fTel.value) fTel.value = s.telefone || '';
+    } catch(e){}
+  }
+  function save(l){ try { sessionStorage.setItem(SAVE, JSON.stringify({ nome: l.nome, email: l.email, telefone: l.telefone })); } catch(e){} }
+
+  function openCheckout(m, btn){
+    mode = m; opener = btn; stopTimers();
+    var t = MODES[m];
+    $('cm-kicker').textContent = t.kicker; $('cm-title').textContent = t.title; $('cm-desc').textContent = t.desc;
+    $('cm-price').textContent = t.price; $('cm-cash').textContent = t.cash; $('cm-email-label').textContent = t.email;
+    cmFerr.textContent = ''; [fNome, fEmail, fTel].forEach(function(f){ setErr(f, ''); });
+    loadSaved(); resetBtn(); step('form');
     if (typeof dlg.showModal === 'function') { if (!dlg.open) dlg.showModal(); }
     else dlg.setAttribute('open', '');
-    setTimeout(function(){ amEmail.focus(); }, 60);
+    var first = [fNome, fEmail, fTel].filter(function(f){ return !f.value; })[0] || fNome;
+    setTimeout(function(){ first.focus(); }, 60);
   }
-  function closeAluno(){
+  function closeCheckout(){
     stopTimers();
     if (typeof dlg.close === 'function' && dlg.open) dlg.close();
     else { dlg.removeAttribute('open'); afterClose(); }
   }
-  function afterClose(){ stopTimers(); resetForm(); if (opener) opener.focus(); }
+  function afterClose(){ stopTimers(); resetBtn(); if (opener) opener.focus(); }
   dlg.addEventListener('close', afterClose);
-  dlg.addEventListener('click', function(e){ if (e.target === dlg && !busy) closeAluno(); }); // clique fora do cartão
+  dlg.addEventListener('click', function(e){ if (e.target === dlg && !busy) closeCheckout(); }); // clique fora do cartão
   dlg.addEventListener('cancel', function(e){ if (busy) e.preventDefault(); });
-  dlg.querySelectorAll('[data-close]').forEach(function(b){ b.addEventListener('click', closeAluno); });
-  document.querySelectorAll('[data-aluno]').forEach(function(b){ b.addEventListener('click', function(){ openAluno(b); }); });
+  dlg.querySelectorAll('[data-close]').forEach(function(b){ b.addEventListener('click', closeCheckout); });
 
-  function setErr(msg){
-    amErr.textContent = msg || '';
-    if (msg) amEmail.setAttribute('aria-invalid', 'true'); else amEmail.removeAttribute('aria-invalid');
+  document.querySelectorAll('[data-checkout="nao-aluno"]').forEach(function(a){
+    a.href = checkout(CONFIG.checkoutNaoAluno); // sem JS, o link continua indo direto para o checkout
+    a.addEventListener('click', function(e){ e.preventDefault(); openCheckout('nao-aluno', a); });
+  });
+  document.querySelectorAll('[data-aluno]').forEach(function(b){ b.addEventListener('click', function(){ openCheckout('aluno', b); }); });
+
+  /* ---------- telefone: máscara (11) 91234-5678 ---------- */
+  function mask(d){
+    if (d.length <= 2) return d.length ? '(' + d : '';
+    if (d.length <= 6) return '(' + d.slice(0,2) + ') ' + d.slice(2);
+    if (d.length <= 10) return '(' + d.slice(0,2) + ') ' + d.slice(2,6) + '-' + d.slice(6);
+    return '(' + d.slice(0,2) + ') ' + d.slice(2,7) + '-' + d.slice(7);
   }
-  amEmail.addEventListener('input', function(){ if (amEmail.getAttribute('aria-invalid') === 'true') setErr(''); amFerr.textContent = ''; });
+  fTel.addEventListener('input', function(){
+    var d = digits(fTel.value);
+    if (d.length > 11 && d.indexOf('55') === 0) d = d.slice(2); // +55 colado pelo preenchimento automático
+    fTel.value = mask(d.slice(0, 11));
+    if (fTel.getAttribute('aria-invalid') === 'true') validate(fTel);
+  });
+
+  /* ---------- validação junto ao campo ---------- */
+  function setErr(input, msg){
+    $(input.getAttribute('aria-describedby')).textContent = msg || '';
+    if (msg) input.setAttribute('aria-invalid', 'true'); else input.removeAttribute('aria-invalid');
+    return !msg;
+  }
+  function validate(input){
+    if (input === fNome) {
+      var n = fNome.value.trim();
+      if (!n) return setErr(fNome, 'Informe seu nome.');
+      if (n.length < 2) return setErr(fNome, 'O nome precisa ter pelo menos 2 letras.');
+      return setErr(fNome, '');
+    }
+    if (input === fEmail) {
+      var m = fEmail.value.trim();
+      if (!m) return setErr(fEmail, mode === 'aluno' ? 'Informe seu e-mail de aluno.' : 'Informe seu e-mail.');
+      if (!EMAIL_RE.test(m)) return setErr(fEmail, 'Confira o e-mail. Exemplo: voce@email.com');
+      return setErr(fEmail, '');
+    }
+    var d = digits(fTel.value);
+    if (!d) return setErr(fTel, 'Informe seu WhatsApp com DDD.');
+    if (d.length < 10) return setErr(fTel, 'Número incompleto. Use DDD + número, ex.: (11) 91234-5678.');
+    if (+d.slice(0,2) < 11) return setErr(fTel, 'DDD inválido. Confira os dois primeiros dígitos.');
+    if (d.length === 11 && d[2] !== '9') return setErr(fTel, 'Confira o número: celulares começam com 9 depois do DDD.');
+    return setErr(fTel, '');
+  }
+  [fNome, fEmail, fTel].forEach(function(f){
+    f.addEventListener('blur', function(){ if (f.value) validate(f); });
+    if (f !== fTel) f.addEventListener('input', function(){ if (f.getAttribute('aria-invalid') === 'true') validate(f); cmFerr.textContent = ''; });
+  });
 
   function verificar(email){
     var ctrl = window.AbortController ? new AbortController() : null;
@@ -1718,52 +1865,74 @@ var CONFIG = {
     }, function(err){ clearTimeout(t); throw err; });
   }
 
-  amForm.addEventListener('submit', function(e){
+  /* não aluno (ou aluno não encontrado): webhook de não aluno -> checkout de não aluno */
+  var going = false;
+  function irNaoAluno(extra){
+    if (going) return; going = true; stopTimers();
+    var dest = checkout(CONFIG.checkoutNaoAluno, lead);
+    track('nao-aluno');
+    enviar(CONFIG.webhookNaoAluno, payload(lead, 'nao-aluno', extra)).then(function(){ location.href = dest; });
+  }
+
+  cmForm.addEventListener('submit', function(e){
     e.preventDefault();
     if (busy) return;
-    amFerr.textContent = '';
-    var m = amEmail.value.trim().toLowerCase();
-    if (!m) { setErr('Informe seu e-mail de aluno.'); amEmail.focus(); return; }
-    if (!EMAIL_RE.test(m)) { setErr('Confira o e-mail. Exemplo: voce@email.com'); amEmail.focus(); return; }
-    setErr('');
-    busy = true; amBtn.disabled = true; amForm.classList.add('is-loading'); amLabel.textContent = 'Verificando…';
+    cmFerr.textContent = '';
+    var okN = validate(fNome), okE = validate(fEmail), okT = validate(fTel);
+    if (!okN || !okE || !okT) { (!okN ? fNome : !okE ? fEmail : fTel).focus(); return; }
 
-    verificar(m).then(function(aluno){
-      busy = false;
+    lead = { nome: fNome.value.trim().replace(/\s+/g, ' '), email: fEmail.value.trim().toLowerCase(), telefone: fTel.value, clicouEm: mode };
+    save(lead);
+    going = false;
+    busy = true; cmBtn.disabled = true; cmForm.classList.add('is-loading');
+
+    if (mode === 'nao-aluno') {
+      cmLabel.textContent = 'Indo para o pagamento…';
+      irNaoAluno();
+      return;
+    }
+
+    cmLabel.textContent = 'Verificando…';
+    verificar(lead.email).then(function(aluno){
       if (aluno) {
-        var dest = checkout(CONFIG.checkoutAluno, m);
-        $('am-ok-go').href = dest;
-        step('ok');
+        var dest = checkout(CONFIG.checkoutAluno, lead);
+        $('cm-ok-go').href = dest;
+        busy = false; step('ok');
         track('aluno');
-        goT = setTimeout(function(){ location.href = dest; }, 1200);
+        var sent = enviar(CONFIG.webhookAluno, payload(lead, 'aluno', { verificacao: 'aluno_confirmado' }));
+        var wait = new Promise(function(r){ goT = setTimeout(r, 900); });
+        Promise.all([sent, wait]).then(function(){ location.href = dest; });
       } else {
-        var destNao = checkout(CONFIG.checkoutNaoAluno, m);
-        $('am-no-email').textContent = m;
-        $('am-no-go').href = destNao;
+        busy = false;
+        $('cm-no-email').textContent = lead.email;
+        $('cm-no-go').href = checkout(CONFIG.checkoutNaoAluno, lead);
         step('no');
-        var s = CONFIG.segundosAteRedirecionar, cnt = $('am-count');
+        var s = CONFIG.segundosAteRedirecionar, cnt = $('cm-count');
         var paint = function(){ cnt.textContent = 'Seguindo para o pagamento em ' + s + ' s…'; };
         paint();
         countT = setInterval(function(){
           s -= 1;
-          if (s <= 0) { stopTimers(); cnt.textContent = 'Redirecionando…'; track('nao-aluno'); location.href = destNao; return; }
+          if (s <= 0) { cnt.textContent = 'Redirecionando…'; irNaoAluno({ verificacao: 'aluno_nao_encontrado' }); return; }
           paint();
         }, 1000);
       }
     }).catch(function(err){
       console.error('[BFI] Falha na verificação do e-mail de aluno:', err);
-      resetForm();
-      amFerr.textContent = 'Não conseguimos verificar seu e-mail agora. Tente de novo em instantes.';
+      resetBtn();
+      cmFerr.textContent = 'Não conseguimos verificar seu e-mail agora. Tente de novo em instantes.';
     });
   });
-  $('am-no-go').addEventListener('click', function(){ stopTimers(); track('nao-aluno'); });
-  $('am-ok-go').addEventListener('click', function(){ clearTimeout(goT); });
-  $('am-retry').addEventListener('click', function(){
-    stopTimers(); resetForm(); step('form');
-    setTimeout(function(){ amEmail.focus(); amEmail.select(); }, 30);
+  $('cm-no-go').addEventListener('click', function(e){
+    e.preventDefault(); $('cm-count').textContent = 'Redirecionando…';
+    irNaoAluno({ verificacao: 'aluno_nao_encontrado' });
+  });
+  $('cm-ok-go').addEventListener('click', function(){ clearTimeout(goT); });
+  $('cm-retry').addEventListener('click', function(){
+    stopTimers(); going = false; resetBtn(); step('form');
+    setTimeout(function(){ fEmail.focus(); fEmail.select(); }, 30);
   });
   // ao voltar do checkout pelo botão "voltar", o navegador pode restaurar a página com o pop-up aberto
-  window.addEventListener('pageshow', function(ev){ if (ev.persisted && dlg.open) closeAluno(); });
+  window.addEventListener('pageshow', function(ev){ if (ev.persisted) { going = false; if (dlg.open) closeCheckout(); } });
 
   /* ---------- barra fixa no celular ---------- */
   var mbar = $('mbar'), mbarBtn = mbar.querySelector('a');

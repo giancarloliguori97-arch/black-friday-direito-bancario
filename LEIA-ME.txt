@@ -73,3 +73,13 @@ PÁGINA DE VENDAS (/black-friday)
     Aluno confirmado  -> checkout de aluno.
     Não encontrado    -> mensagem + checkout de não aluno (sozinho em 6 s, ou pelo botão).
     Sem webhook/erro  -> o pop-up mostra "tente de novo" e não manda para nenhum checkout.
+
+  Pré-checkout (pop-up com nome, e-mail e WhatsApp, nos dois botões)
+    No black-friday.html, em "var CONFIG":
+      webhookAluno     recebe quem teve o e-mail de aluno confirmado
+      webhookNaoAluno  recebe quem clicou em não aluno, e também quem clicou em aluno
+                       e não foi encontrado (campo verificacao = aluno_nao_encontrado)
+    Campos enviados (form-urlencoded): nome, email, whatsapp (55+DDD+número), telefone,
+      tipo, clicou_em, verificacao, campanha, pagina, enviado_em e as UTMs da URL.
+    Webhook vazio ou fora do ar: a pessoa segue para o checkout mesmo assim.
+    Nome, e-mail e telefone chegam preenchidos no checkout da Hotmart (name, email, phoneac, phonenumber).
