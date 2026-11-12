@@ -1656,8 +1656,9 @@ var CONFIG = {
   checkoutAluno: 'https://pay.hotmart.com/C108463383T?off=mk2ryhft',
   checkoutNaoAluno: 'https://pay.hotmart.com/C108463383T?off=we6vmqkl',
   // Webhooks que recebem o pré-checkout (nome, e-mail, WhatsApp). Vazio = não envia, mas a compra segue normalmente.
-  webhookAluno: '',      // aluno com e-mail confirmado
-  webhookNaoAluno: 'https://hook.us2.make.com/pq826u4nw0c3wjd2az2aavmmav61wrnr',   // não aluno (inclui quem clicou em "Já sou aluno" e não foi encontrado)
+  webhookAluno: '',      // opcional: aviso extra quando o aluno é confirmado. Os dados de quem clica em "Já sou aluno"
+                         // já vão completos para o webhook de verificação (VERIFICACAO_ALUNO_URL na Vercel)
+  webhookNaoAluno: 'https://hook.us2.make.com/pq826u4nw0c3wjd2az2aavmmav61wrnr',   // quem clicou em "Ainda não sou aluno"
   // Tempo máximo (ms) esperando o webhook antes de ir para o checkout (o envio continua em segundo plano)
   esperaWebhookMs: 1500,
   // Verificação do e-mail de aluno (função em /api/verificar-aluno.js, que consulta o webhook configurado na Vercel)
@@ -1847,13 +1848,13 @@ var CONFIG = {
     if (f !== fTel) f.addEventListener('input', function(){ if (f.getAttribute('aria-invalid') === 'true') validate(f); cmFerr.textContent = ''; });
   });
 
-  function verificar(email){
+  function verificar(dados){
     var ctrl = window.AbortController ? new AbortController() : null;
     var t = ctrl ? setTimeout(function(){ ctrl.abort(); }, CONFIG.verificacaoTimeoutMs) : 0;
     return fetch(CONFIG.verificacaoUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: email }),
+      body: JSON.stringify(dados),
       signal: ctrl ? ctrl.signal : undefined
     }).then(function(r){
       clearTimeout(t);
@@ -1871,7 +1872,9 @@ var CONFIG = {
     if (going) return; going = true; stopTimers();
     var dest = checkout(CONFIG.checkoutNaoAluno, lead);
     track('nao-aluno');
-    enviar(CONFIG.webhookNaoAluno, payload(lead, 'nao-aluno', extra)).then(function(){ location.href = dest; });
+    var envio = lead.clicouEm === 'aluno' ? Promise.resolve() // já foi completo para o webhook de verificação
+      : enviar(CONFIG.webhookNaoAluno, payload(lead, 'nao-aluno', extra));
+    envio.then(function(){ location.href = dest; });
   }
 
   cmForm.addEventListener('submit', function(e){
@@ -1893,7 +1896,8 @@ var CONFIG = {
     }
 
     cmLabel.textContent = 'Verificando…';
-    verificar(lead.email).then(function(aluno){
+    var dadosVerificacao = payload(lead, 'aluno'); delete dadosVerificacao.tipo; // o resultado ainda não existe
+    verificar(dadosVerificacao).then(function(aluno){
       if (aluno) {
         var dest = checkout(CONFIG.checkoutAluno, lead);
         $('cm-ok-go').href = dest;

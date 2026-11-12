@@ -8,7 +8,9 @@
  *
  *   VERIFICACAO_ALUNO_URL = https://hook.us2.make.com/....
  *
- * O webhook recebe um POST em JSON: { "email": "fulano@email.com" }
+ * O webhook recebe um POST em JSON com todos os campos do pré-checkout:
+ *   { "email", "nome", "whatsapp" (55+DDD+número), "telefone", "clicou_em", "campanha",
+ *     "pagina", "enviado_em", "utm_source"... }
  * e deve responder com uma destas formas (qualquer uma serve):
  *   { "aluno": true }   { "aluno": false }
  *   true / false / "sim" / "nao"
@@ -41,12 +43,16 @@ function interpret(text) {
   try { return isYes(JSON.parse(t)); } catch (e) { return isYes(t); }
 }
 
-function readEmail(body) {
+// campos do formulário repassados ao webhook (o resto é descartado)
+const FIELDS = ['nome', 'whatsapp', 'telefone', 'clicou_em', 'campanha', 'pagina', 'enviado_em',
+  'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'src', 'sck', 'xcod'];
+
+function readBody(body) {
   let b = body;
   if (typeof b === 'string') {
     try { b = JSON.parse(b); } catch (e) { b = Object.fromEntries(new URLSearchParams(b)); }
   }
-  return String((b && b.email) || '').trim().toLowerCase();
+  return b && typeof b === 'object' ? b : {};
 }
 
 module.exports = async function handler(req, res) {
@@ -57,7 +63,8 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ erro: 'metodo_nao_permitido' });
   }
 
-  const email = readEmail(req.body);
+  const body = readBody(req.body);
+  const email = String(body.email || '').trim().toLowerCase();
   if (!EMAIL_RE.test(email) || email.length > 254) {
     return res.status(400).json({ erro: 'email_invalido' });
   }
@@ -68,13 +75,16 @@ module.exports = async function handler(req, res) {
     return res.status(503).json({ erro: 'verificacao_nao_configurada' });
   }
 
+  const dados = { email };
+  for (const k of FIELDS) if (body[k] !== undefined && body[k] !== null && body[k] !== '') dados[k] = String(body[k]).slice(0, 500);
+
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
   try {
     const r = await fetch(webhook, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json, text/plain, */*' },
-      body: JSON.stringify({ email }),
+      body: JSON.stringify(dados),
       signal: ctrl.signal
     });
     const text = await r.text();

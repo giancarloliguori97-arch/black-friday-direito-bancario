@@ -69,7 +69,9 @@ PÁGINA DE VENDAS (/black-friday)
   Verificação do e-mail de aluno
     Na Vercel: Settings > Environment Variables > VERIFICACAO_ALUNO_URL = URL do webhook
     (Make, n8n…). Depois de salvar, faça um novo deploy.
-    O webhook recebe POST em JSON {"email": "..."} e responde {"aluno": true} ou {"aluno": false}.
+    O webhook recebe POST em JSON com todos os campos do pré-checkout (email, nome, whatsapp,
+    telefone, clicou_em, campanha, pagina, enviado_em, UTMs) e responde {"aluno": true} ou {"aluno": false}
+    pelo módulo "Webhook response" do Make (sem ele o Make responde "Accepted" = não aluno).
     Aluno confirmado  -> checkout de aluno.
     Não encontrado    -> mensagem + checkout de não aluno (sozinho em 6 s, ou pelo botão).
     Sem webhook/erro  -> o pop-up mostra "tente de novo" e não manda para nenhum checkout.
@@ -77,8 +79,8 @@ PÁGINA DE VENDAS (/black-friday)
   Pré-checkout (pop-up com nome, e-mail e WhatsApp, nos dois botões)
     No black-friday.html, em "var CONFIG":
       webhookAluno     recebe quem teve o e-mail de aluno confirmado
-      webhookNaoAluno  recebe quem clicou em não aluno, e também quem clicou em aluno
-                       e não foi encontrado (campo verificacao = aluno_nao_encontrado)
+      webhookNaoAluno  recebe quem clicou em "Ainda não sou aluno"
+      Quem clica em "Já sou aluno" vai inteiro para o webhook de verificação (não duplica no de não aluno).
     Campos enviados (form-urlencoded): nome, email, whatsapp (55+DDD+número), telefone,
       tipo, clicou_em, verificacao, campanha, pagina, enviado_em e as UTMs da URL.
     Webhook vazio ou fora do ar: a pessoa segue para o checkout mesmo assim.
