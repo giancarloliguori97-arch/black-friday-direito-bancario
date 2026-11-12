@@ -85,3 +85,12 @@ PÁGINA DE VENDAS (/black-friday)
       tipo, clicou_em, verificacao, campanha, pagina, enviado_em e as UTMs da URL.
     Webhook vazio ou fora do ar: a pessoa segue para o checkout mesmo assim.
     Nome, e-mail e telefone chegam preenchidos no checkout da Hotmart (name, email, phoneac, phonenumber).
+
+
+PÁGINA DE UPSELL (/upsell)
+==========================
+  upsell.html        upsell de uma dobra: Ingresso Gold do Acelerador por R$ 697 (de R$ 1.497)
+  img/upsell/        logo, brasão e foto de plateia copiados da página do Acelerador
+  O botão de compra é o widget de funil da Hotmart (hotmart-checkout-elements.js, montado em
+  #hotmart-sales-funnel). Ele só aparece quando a pessoa chega vinda do checkout da Hotmart
+  com o funil configurado; abrindo a página direto, o espaço do botão fica vazio.
