@@ -846,6 +846,9 @@ body::after{content:"";position:fixed;inset:-50%;z-index:100;pointer-events:none
 .perk-price{margin-top:auto;padding-top:24px;display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 12px}
 .perk-price .de{font-size:15px;color:var(--text-2)}
 .perk-price b{font-size:clamp(32px,1.6vw + 22px,42px);line-height:1;font-weight:800;letter-spacing:-.035em;color:var(--gold-light)}
+.perk-surprise{align-items:center}
+.perk-surprise svg{width:26px;height:26px;flex:none;fill:none;stroke:var(--gold-light);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.perk-surprise b{font-size:clamp(26px,1.2vw + 18px,34px)}
 .perk-how{margin-top:14px;padding-top:14px;border-top:1px solid var(--line);font-size:13.5px;line-height:1.5;color:var(--text-2)}
 .perk--main{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:clamp(28px,4vw,64px);align-items:center;padding:clamp(32px,4vw,60px);border-color:var(--gold);background:radial-gradient(ellipse 80% 90% at 100% 0%,rgba(210,174,99,.18),transparent 60%),linear-gradient(135deg,#1D1A14,#100F0D);box-shadow:0 0 0 1px rgba(210,174,99,.12),0 40px 110px -40px rgba(210,174,99,.32)}
 .perk--main > div{display:flex;flex-direction:column}
@@ -1400,9 +1403,9 @@ src="https://www.facebook.com/tr?id=960132592978971&ev=PageView&noscript=1"/></n
         <span class="seal">Condição exclusiva</span>
         <h3>Ingresso Gold do Acelerador da Advocacia Bancária</h3>
         <p class="what">Evento presencial · 20, 21 e 22 de novembro · Alphaville (SP)</p>
-        <p>Três dias de evento presencial. Só quem entra na Black consegue levar o ingresso por esse valor.</p>
-        <p class="perk-price"><span class="de">De <s class="strike">R$ 1.497</s> por</span><b>R$ 697</b></p>
-        <p class="perk-how">Na hora do pagamento, é só marcar para incluir na sua compra.</p>
+        <p>Três dias de evento presencial, com uma condição exclusiva para quem entra na Black.</p>
+        <p class="perk-price perk-surprise"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-lock"/></svg><b>Condição surpresa</b></p>
+        <p class="perk-how">Revelada somente após a compra, só para quem comprar.</p>
       </article>
 
       <article class="perk rv" style="--d:.08s">
