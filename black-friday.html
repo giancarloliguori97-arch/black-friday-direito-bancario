@@ -712,6 +712,9 @@ body::after{content:"";position:fixed;inset:-50%;z-index:100;pointer-events:none
 .ho-price{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;margin-top:8px;line-height:1}
 .ho-price .x{font-size:15px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--text)}
 .ho-price .v{font-size:clamp(42px,2.4vw + 26px,60px);font-weight:800;letter-spacing:-.04em}
+.ho-list{margin:14px 0 0;padding:0;list-style:none;display:grid;gap:10px}
+.ho-list li{display:flex;align-items:flex-start;gap:10px;font-size:15px;line-height:1.45;font-weight:600;color:var(--text)}
+.ho-list svg{flex:none;width:18px;height:18px;margin-top:1px;padding:3px;border-radius:50%;background:rgba(210,174,99,.14);color:var(--gold-light)}
 .ho-cash{margin-top:10px;font-size:15px;color:var(--text-2)}
 .ho-cash b{color:var(--text);font-weight:700}
 .hero .panel .micro{align-items:flex-start}
@@ -1043,13 +1046,16 @@ src="https://www.facebook.com/tr?id=960132592978971&ev=PageView&noscript=1"/></n
 
       <div class="panel hero-in" id="hero-oferta" style="--d:.6s">
         <p class="ho-k">Black Friday Infinita</p>
-        <p class="ho-price"><span class="x">12x de</span><span class="v gold-text">R$ 498,72</span></p>
-        <p class="ho-cash">ou <b>R$ 4.997</b> à vista</p>
-        <a class="btn btn-shine" href="#oferta">
+        <ul class="ho-list">
+          <li><svg aria-hidden="true"><use href="#ic-check"/></svg>Casos reais de R$ 100 mil a R$ 10 mi</li>
+          <li><svg aria-hidden="true"><use href="#ic-check"/></svg>O funil de clientes do escritório</li>
+          <li><svg aria-hidden="true"><use href="#ic-check"/></svg>Acesso vitalício, sem mensalidade</li>
+        </ul>
+        <a class="btn btn-shine" href="#precos">
           <span class="btn-label">Quero acesso vitalício</span>
           <svg aria-hidden="true"><use href="#ic-arrow"/></svg>
         </a>
-        <p class="micro"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-lock"/></svg><span>Já é aluno? Você tem uma condição especial. <a href="#oferta">Ver a oferta para alunos</a></span></p>
+        <p class="micro"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-lock"/></svg><span>Já é aluno? Você tem uma condição especial. <a href="#precos">Ver a oferta para alunos</a></span></p>
       </div>
     </div>
   </div>
